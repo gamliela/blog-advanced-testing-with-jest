@@ -1,6 +1,7 @@
 import { screen, render, fireEvent, waitFor } from "@testing-library/react";
 import { ImageLoader } from "./ImageLoader";
 import { mockWebpImage, mockRemoteImageServer } from "../mocks/mockRemoteImageServer";
+import { advanceTimersByTimeAsync } from "../testUtils";
 
 const getLoadButton = () => screen.getByRole("button", { name: "Load image" });
 const getCancelButton = () => screen.getByRole("button", { name: "Cancel" });
@@ -73,5 +74,23 @@ describe("ImageLoader", () => {
     const error = await findError();
     expect(error).toHaveTextContent("Timeout error.");
     expect(queryImage()).toBeNull();
+  });
+
+  it("allows the user to abort the request with no error message", async () => {
+    mockRemoteImageServer({ responseTime: 2500 });
+
+    render(<ImageLoader />);
+    const loadButton = getLoadButton();
+
+    fireEvent.click(loadButton);
+    expect(loadButton).toBeDisabled();
+
+    await advanceTimersByTimeAsync(1000);
+    fireEvent.click(getCancelButton());
+
+    await waitFor(() => {
+      expect(loadButton).toBeEnabled();
+    });
+    expect(queryError()).toBeNull();
   });
 });
