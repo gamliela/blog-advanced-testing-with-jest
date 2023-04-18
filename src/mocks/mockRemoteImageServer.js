@@ -1,15 +1,12 @@
-import { readFileSync } from "node:fs";
-import * as path from "node:path";
 import { compose, context, rest } from "msw";
 import { server } from "./server";
 
-let cachedWebpImage;
-
+// Returns hardcoded blank webp image.
 function mockWebpImage() {
-  if (!cachedWebpImage) {
-    cachedWebpImage = readFileSync(path.resolve(__dirname, "./blankImage.webp"));
-  }
-  return cachedWebpImage;
+  return Buffer.from(
+    "UklGRj4AAABXRUJQVlA4IDIAAAAQBACdASpEAEYAPpFIoUylpCMiIUgAsBIJaQAACfGjRo0aNGjRo0Z+AAD++E0AAAAAAA==",
+    "base64"
+  );
 }
 
 function mockRemoteImageServer({ webpImage = mockWebpImage(), error = false, responseTime = 0 } = {}) {
